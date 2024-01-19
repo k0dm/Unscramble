@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Unscramble</string>
+    <string name="unscramble">Unscramble</string>
+    <string name="clue">Unsramble the world using all the letters.</string>
+    <string name="enter_your_word">Enter your word</string>
+    <string name="submit">Submit</string>
+    <string name="skip">Skip</string>
+    <string name="score">Score:</string>
+    <string name="enter_text_here">Enter text here</string>
 </resources>
