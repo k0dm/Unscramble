@@ -88,7 +88,7 @@ class ScenarioTest {
         errorPage.checkVisible()
         initialPage.clickSubmit()
 
-        val gameOverPage = GameOverPage(score = "15")
+        val gameOverPage = GameOverPage(score = "20")
         errorPage.checkNotVisible()
         initialPage.checkNotVisible()
         gameOverPage.checkVisible()

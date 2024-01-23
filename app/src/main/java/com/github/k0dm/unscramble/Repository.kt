@@ -2,32 +2,85 @@ package com.github.k0dm.unscramble
 
 interface Repository {
 
-    fun wordWithScore(): WordWithScore
+    fun words(numberOfWords: Int): List<String>
 
     class Base : Repository {
 
-        private val listOfWords = listOf<WordWithScore>(
-            WordWithScore(word = "animal", score = 20),
-            WordWithScore(word = "auto", score = 20),
-            WordWithScore(word = "anecdote", score = 40),
-            WordWithScore(word = "hello", score = 20),
-            WordWithScore(word = "dog", score = 10),
-            WordWithScore(word = "forest", score = 20),
-            WordWithScore(word = "keyboard", score = 30),
-            WordWithScore(word = "laptop", score = 20),
-            WordWithScore(word = "cat", score = 10),
-            WordWithScore(word = "transparent", score = 50)
+        private val listOfWords = listOf<String>(
+            "animal",
+            "auto",
+            "anecdote",
+            "hello",
+            "dog",
+            "forest",
+            "keyboard",
+            "laptop",
+            "cat",
+            "transparent",
+            "like",
+            "form",
+            "powder",
+            "inn",
+            "boy",
+            "venture",
+            "ball",
+            "breakfast",
+            "chair",
+            "economist",
+            "abstract",
+            "plain",
+            "training",
+            "index",
+            "research",
+            "bomber",
+            "belly",
+            "exercise",
+            "brake",
+            "perforate",
+            "feminist",
+            "soak",
+            "advocate",
+            "fly",
+            "hostile",
+            "recommend",
+            "behead",
+            "window",
+            "central",
+            "abuse",
+            "embark",
+            "bitch",
+            "reduction",
+            "far",
+            "script",
+            "personality",
+            "fault",
+            "subway",
+            "fantasy",
+            "disappoint",
+            "orange",
+            "slice",
+            "tear",
+            "retire",
+            "cower",
+            "salmon",
+            "distribute",
+            "marriage",
+            "social",
+            "clinic"
         )
 
         private var currentIndex = 0
-        override fun wordWithScore(): WordWithScore {
-            return if (currentIndex != listOfWords.lastIndex) {
-                listOfWords[currentIndex++]
-            } else {
-                val word = listOfWords[currentIndex]
-                currentIndex = 0
-                word
+        override fun words(numberOfWords: Int): List<String> {
+            val resultList = arrayListOf<String>()
+            repeat(numberOfWords) {
+                if (currentIndex < listOfWords.lastIndex) {
+                    resultList.add(listOfWords[currentIndex++])
+                } else {
+                    resultList.add(listOfWords[currentIndex])
+                    currentIndex = 0
+                }
             }
+            return resultList
         }
     }
 }

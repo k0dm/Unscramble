@@ -1,71 +1,49 @@
 package com.github.k0dm.unscramble
 
-class GameViewModel(private val repository: Repository) {
+class GameViewModel(
+    private val gameInteractor: Interactor,
+    private val toInitialUiMapper: UiMapper = UiMapper.ToInitial,
+    private val toGameOverMapper: UiMapper = UiMapper.GameOver,
+    private val toErrorMapper: UiMapper = UiMapper.Error
+) {
 
-    private var wordWithScore: ShuffleWordAndScore = ShuffleWordAndScore.Empty
-    private val maxWords = 2
-    private var currentNumber = 1
-    private var currentScore = 0
-    private var currentAttempt = 0
-    private var isGameOver = false
+    private var gameSession: GameSession = GameSession.Empty
 
     fun init(): UiState {
-        wordWithScore = repository.wordWithScore()
-        return UiState.Initial("1/$maxWords", "0", wordWithScore.shuffledWord())
+        gameSession = gameInteractor.gameSession()
+        return gameSession.map(toInitialUiMapper)
     }
 
-    fun update(text: String): UiState {
-        return if (text.length == wordWithScore.shuffledWord().length)
-            UiState.ReadyToSubmit
-        else
-            UiState.NotReadyToSubmit
-    }
+    fun update(text: String): UiState = gameSession.map(UiMapper.IsReadyToSubmit(text))
 
     fun submit(word: String): UiState {
-        return if (wordWithScore.checkIsTheSame(word)) {
-            currentScore += wordWithScore.score(currentAttempt)
-
-            if (currentNumber == maxWords) {
-                isGameOver = true
-                UiState.GameOver(currentScore.toString())
+        return if (gameSession.isTheSameWord(word)) {
+            gameSession.calculateScore()
+            if (gameSession.isLastWord()) {
+                gameSession.finishGame()
+                gameSession.map(toGameOverMapper)
             } else {
-                currentAttempt = 0
-                currentNumber++
-                wordWithScore = repository.wordWithScore()
-                UiState.Initial(
-                    "$currentNumber/$maxWords",
-                    currentScore.toString(),
-                    wordWithScore.shuffledWord()
-                )
+                gameSession.nextWord()
+                val uiState = gameSession.map(toInitialUiMapper)
+                uiState
             }
         } else {
-            currentAttempt++
-            UiState.Error
+            gameSession.attempt()
+            gameSession.map(toErrorMapper)
         }
     }
 
     fun skip(): UiState {
-        return if (currentNumber == maxWords) {
-            if (isGameOver) {
-                currentNumber = 1
-                currentScore = 0
-                currentAttempt = 0
-                isGameOver = false
-                wordWithScore = repository.wordWithScore()
-                UiState.Initial("1/$maxWords", "0", wordWithScore.shuffledWord())            } else {
-                isGameOver = true
-                UiState.GameOver(currentScore.toString())
+        return if (gameSession.isLastWord()) {
+            if (gameSession.isGameOver()) {
+               init()
+            } else {
+                gameSession.finishGame()
+                gameSession.map(toGameOverMapper)
             }
-
         } else {
-            currentAttempt = 0
-            currentNumber++
-            wordWithScore = repository.wordWithScore()
-            UiState.Initial(
-                "$currentNumber/$maxWords",
-                currentScore.toString(),
-                wordWithScore.shuffledWord()
-            )
+            gameSession.nextWord()
+            gameSession.map(toInitialUiMapper)
         }
     }
 }

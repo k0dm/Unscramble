@@ -10,7 +10,7 @@ class GameViewModelTest {
 
     @Before
     fun setUp() {
-        viewModel = GameViewModel(Repository.Base())
+        viewModel = GameViewModel(FakeInteractor())
     }
 
     @Test
@@ -39,7 +39,7 @@ class GameViewModelTest {
         expected = UiState.ReadyToSubmit
         assertEquals(expected, actual)
 
-        actual = viewModel.submit(word ="animal")
+        actual = viewModel.submit(word = "animal")
         expected = UiState.Initial(counter = "2/2", score = "20", shuffledWord = "otua")
         assertEquals(expected, actual)
 
@@ -96,7 +96,7 @@ class GameViewModelTest {
         assertEquals(expected, actual)
 
         actual = viewModel.submit("anecdote")
-        expected = UiState.Initial(counter = "2/2", score = "20", shuffledWord = "hello".reversed())
+        expected = UiState.Initial(counter = "2/2", score = "10", shuffledWord = "hello".reversed())
         assertEquals(expected, actual)
 
         "hell".forEachIndexed { index, _ ->
@@ -122,35 +122,179 @@ class GameViewModelTest {
         assertEquals(expected, actual)
 
         actual = viewModel.submit("hello")
-        expected = UiState.GameOver(score = "30")
+        expected = UiState.GameOver(score = "20")
         assertEquals(expected, actual)
 
+    }
+
+    @Test
+    fun incorrectThenSkipThenIncorrectThenCorrect() {
+        var actual: UiState = viewModel.init()
+        var expected: UiState =
+            UiState.Initial(counter = "1/2", score = "0", shuffledWord = "lamina")
+        assertEquals(expected, actual)
+
+        actual = viewModel.submit("animak")
+        expected = UiState.Error
+        assertEquals(expected, actual)
+
+        actual = viewModel.skip()
+        expected = UiState.Initial(counter = "2/2", score = "0", shuffledWord = "otua")
+        assertEquals(expected, actual)
+
+        actual = viewModel.submit("autq")
+        expected = UiState.Error
+        assertEquals(expected, actual)
+
+        actual = viewModel.update("aut")
+        expected = UiState.NotReadyToSubmit
+        assertEquals(expected, actual)
+
+        actual = viewModel.update("auto")
+        expected = UiState.ReadyToSubmit
+        assertEquals(expected, actual)
+
+        actual = viewModel.submit("auto")
+        expected = UiState.GameOver(score = "10")
+        assertEquals(expected, actual)
+    }
+}
+
+private class FakeInteractor() : Interactor {
+
+    private val repository = FakeRepository()
+    private val maxWords = 2
+    private val shuffleWord = FakeShuffleWord()
+
+    override fun gameSession(): GameSession {
+        val listOfWords = repository.words(maxWords)
+        return FakeGameSession(words = listOfWords, maxWords = maxWords, shuffleWord = shuffleWord)
     }
 }
 
 private class FakeRepository : Repository {
 
-    private val listOfWords = listOf<WordWithScore>(
-        WordWithScore(word = "animal", score = 20),
-        WordWithScore(word = "auto", score = 20),
-        WordWithScore(word = "anecdote", score = 40),
-        WordWithScore(word = "hello", score = 20),
-        WordWithScore(word = "dog", score = 10),
-        WordWithScore(word = "forest", score = 20),
-        WordWithScore(word = "keyboard", score = 30),
-        WordWithScore(word = "laptop", score = 20),
-        WordWithScore(word = "cat", score = 10),
-        WordWithScore(word = "transparent", score = 50)
+    private val listOfWords = listOf<String>(
+        "animal",
+        "auto",
+        "anecdote",
+        "hello",
+        "dog",
+        "forest",
+        "keyboard",
+        "laptop",
+        "cat",
+        "transparent",
+        "like",
+        "form",
+        "powder",
+        "inn",
+        "boy",
+        "venture",
+        "ball",
+        "breakfast",
+        "chair",
+        "economist",
+        "abstract",
+        "plain",
+        "training",
+        "index",
+        "research",
+        "bomber",
+        "belly",
+        "exercise",
+        "brake",
+        "perforate",
+        "feminist",
+        "soak",
+        "advocate",
+        "fly",
+        "hostile",
+        "recommend",
+        "behead",
+        "window",
+        "central",
+        "abuse",
+        "embark",
+        "bitch",
+        "reduction",
+        "far",
+        "script",
+        "personality",
+        "fault",
+        "subway",
+        "fantasy",
+        "disappoint",
+        "orange",
+        "slice",
+        "tear",
+        "retire",
+        "cower",
+        "salmon",
+        "distribute",
+        "marriage",
+        "social",
+        "clinic"
     )
 
-    private var currentIndex = 0
-    override fun wordWithScore(): WordWithScore {
-        return if (currentIndex != listOfWords.lastIndex) {
-            listOfWords[currentIndex++]
-        } else {
-            val word = listOfWords[currentIndex]
-            currentIndex = 0
-            word
+    var currentIndex = 0
+    override fun words(numberOfWords: Int): List<String> {
+        val resultList = arrayListOf<String>()
+        repeat(numberOfWords) {
+            if (currentIndex < listOfWords.lastIndex) {
+                resultList.add(listOfWords[currentIndex++])
+            } else {
+                resultList.add(listOfWords[currentIndex])
+                currentIndex = 0
+            }
         }
+        return resultList
     }
+}
+
+private class FakeGameSession(
+    private val words: List<String>,
+    private val maxWords: Int,
+    private val shuffleWord: ShuffleWord
+) : GameSession {
+
+    private var currentWord = words[0]
+    private var currentIndex = 0
+    private var attemts = 0
+    private var score = 0
+    private var isFinished = false
+
+
+    override fun isTheSameWord(word: String): Boolean = word == currentWord
+
+    override fun calculateScore() {
+        score += if (attemts == 0) 20 else 10
+    }
+
+    override fun attempt() {
+        attemts++
+    }
+
+    override fun finishGame() {
+        isFinished = true
+    }
+
+    override fun nextWord() {
+        attemts = 0
+        currentWord = words[++currentIndex]
+    }
+
+    override fun isLastWord(): Boolean = currentIndex == words.lastIndex
+    override fun isGameOver() = isFinished
+
+    override fun map(uiMapper: UiMapper) = uiMapper.map(
+        shuffledWord = shuffleWord.shuffle(currentWord),
+        counter = "${currentIndex + 1}/$maxWords",
+        score = "$score"
+    )
+}
+
+private class FakeShuffleWord : ShuffleWord {
+
+    override fun shuffle(text: String) = text.reversed()
 }
