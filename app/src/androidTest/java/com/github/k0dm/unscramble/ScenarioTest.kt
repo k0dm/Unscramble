@@ -2,6 +2,7 @@ package com.github.k0dm.unscramble
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.k0dm.unscramble.main.MainActivity
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,6 +25,8 @@ class ScenarioTest {
             initialPage.typeText(word = it)
             initialPage.clickSubmit()
             initialPage.checkVisible(input = buffer)
+            activityScenarioRule.scenario.recreate()
+            initialPage.checkVisible(input = buffer)
         }
 
         initialPage.typeText(word = "l")
@@ -34,9 +37,11 @@ class ScenarioTest {
         initialPage.replaceText(text = "animal")
         initialPage.clickSubmit()
 
-
         initialPage = InitialPage(counter = "2/2", score = "20", shuffledWord = "otua")
         initialPage.checkVisible()
+        activityScenarioRule.scenario.recreate()
+        initialPage.checkVisible()
+
         initialPage.clickSubmit()
         initialPage.checkVisible()
         buffer = ""
@@ -53,6 +58,9 @@ class ScenarioTest {
         val gameOverPage = GameOverPage(score = "40")
         initialPage.checkNotVisible()
         gameOverPage.checkVisible()
+        activityScenarioRule.scenario.recreate()
+        gameOverPage.checkVisible()
+        initialPage.checkNotVisible()
         gameOverPage.clickRestart()
 
 
@@ -277,5 +285,4 @@ class ScenarioTest {
             InitialPage(counter = "1/2", score = "0", shuffledWord = "anecdote".reversed())
         initialPage.checkVisible()
     }
-
 }

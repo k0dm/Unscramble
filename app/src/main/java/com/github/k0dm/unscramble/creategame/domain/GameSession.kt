@@ -1,4 +1,7 @@
-package com.github.k0dm.unscramble
+package com.github.k0dm.unscramble.creategame.domain
+
+import com.github.k0dm.unscramble.game.presentation.ShuffleWord
+import com.github.k0dm.unscramble.game.presentation.UiState
 
 interface GameSession {
 

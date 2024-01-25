@@ -1,5 +1,12 @@
 package com.github.k0dm.unscramble
 
+import com.github.k0dm.unscramble.creategame.data.WordsRepository
+import com.github.k0dm.unscramble.creategame.domain.GameSession
+import com.github.k0dm.unscramble.creategame.domain.GameInteractor
+import com.github.k0dm.unscramble.creategame.domain.UiMapper
+import com.github.k0dm.unscramble.game.presentation.GameViewModel
+import com.github.k0dm.unscramble.game.presentation.ShuffleWord
+import com.github.k0dm.unscramble.game.presentation.UiState
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -10,7 +17,7 @@ class GameViewModelTest {
 
     @Before
     fun setUp() {
-        viewModel = GameViewModel(FakeInteractor())
+        viewModel = GameViewModel(FakeGameInteractor())
     }
 
     @Test
@@ -160,9 +167,9 @@ class GameViewModelTest {
     }
 }
 
-private class FakeInteractor() : Interactor {
+private class FakeGameInteractor() : GameInteractor {
 
-    private val repository = FakeRepository()
+    private val repository = FakeWordsRepository()
     private val maxWords = 2
     private val shuffleWord = FakeShuffleWord()
 
@@ -172,7 +179,7 @@ private class FakeInteractor() : Interactor {
     }
 }
 
-private class FakeRepository : Repository {
+private class FakeWordsRepository : WordsRepository {
 
     private val listOfWords = listOf<String>(
         "animal",

@@ -1,10 +1,14 @@
-package com.github.k0dm.unscramble
+package com.github.k0dm.unscramble.creategame.data
 
-interface Repository {
+interface WordsRepository {
 
-    fun words(numberOfWords: Int): List<String>
+    suspend fun words(numberOfWords: Int): List<String>
 
-    class Base : Repository {
+    class Base(private val wordsService: WordsService): WordsRepository {
+        override suspend fun words(numberOfWords: Int) = wordsService.words(numberOfWords)
+    }
+
+    class Fake : WordsRepository {
 
         private val listOfWords = listOf<String>(
             "animal",
@@ -70,7 +74,7 @@ interface Repository {
         )
 
         private var currentIndex = 0
-        override fun words(numberOfWords: Int): List<String> {
+        override suspend fun words(numberOfWords: Int): List<String> {
             val resultList = arrayListOf<String>()
             repeat(numberOfWords) {
                 if (currentIndex < listOfWords.lastIndex) {

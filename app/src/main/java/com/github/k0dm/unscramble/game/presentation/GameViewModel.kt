@@ -1,11 +1,20 @@
-package com.github.k0dm.unscramble
+package com.github.k0dm.unscramble.game.presentation
+
+import androidx.lifecycle.ViewModel
+import com.github.k0dm.unscramble.creategame.domain.GameSession
+import com.github.k0dm.unscramble.creategame.domain.GameInteractor
+import com.github.k0dm.unscramble.creategame.domain.UiMapper
+import com.github.k0dm.unscramble.creategame.presentation.CreateGameScreen
+import com.github.k0dm.unscramble.creategame.presentation.LiveDataWrapper
+import com.github.k0dm.unscramble.main.Screen
 
 class GameViewModel(
-    private val gameInteractor: Interactor,
+    private val navigation: LiveDataWrapper.Update<Screen>,
+    private val gameInteractor: GameInteractor.StartGame,
     private val toInitialUiMapper: UiMapper = UiMapper.ToInitial,
     private val toGameOverMapper: UiMapper = UiMapper.GameOver,
     private val toErrorMapper: UiMapper = UiMapper.Error
-) {
+): ViewModel() {
 
     private var gameSession: GameSession = GameSession.Empty
 
@@ -36,7 +45,8 @@ class GameViewModel(
     fun skip(): UiState {
         return if (gameSession.isLastWord()) {
             if (gameSession.isGameOver()) {
-               init()
+                navigation.update(CreateGameScreen)
+                UiState.Empty
             } else {
                 gameSession.finishGame()
                 gameSession.map(toGameOverMapper)
