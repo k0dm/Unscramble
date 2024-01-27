@@ -1,27 +1,25 @@
 package com.github.k0dm.unscramble.core
 
-import androidx.lifecycle.ViewModel
-import com.github.k0dm.unscramble.creategame.presentation.CreatedGameViewModel
 import com.github.k0dm.unscramble.creategame.data.WordsRepository
 import com.github.k0dm.unscramble.creategame.data.WordsService
 import com.github.k0dm.unscramble.creategame.domain.GameInteractor
-import com.github.k0dm.unscramble.creategame.presentation.LiveDataWrapper
+import com.github.k0dm.unscramble.creategame.presentation.CreateGameViewModel
 import com.github.k0dm.unscramble.game.presentation.GameViewModel
 import com.github.k0dm.unscramble.game.presentation.ShuffleWord
 import com.github.k0dm.unscramble.main.MainViewModel
+import com.github.k0dm.unscramble.main.Navigation
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.lang.IllegalStateException
 
 interface ProvideViewModel {
 
-    fun <T : ViewModel> viewModel(clazz: Class<out T>): T
+    fun <T : Representative<*>> viewModel(clazz: Class<out T>): T
 
     class Factory : ProvideViewModel {
 
-        private val viewModelMap = mutableMapOf<Class<out ViewModel>, ViewModel>()
+        private val viewModelMap = mutableMapOf<Class<out Representative<*>>, Representative<*>>()
 
         private val logging = HttpLoggingInterceptor().apply {
             setLevel(HttpLoggingInterceptor.Level.BODY)
@@ -38,20 +36,20 @@ interface ProvideViewModel {
                 WordsRepository.Base(retrofit.create(WordsService::class.java)),
                 ShuffleWord.Shuffled
             )
-        private val navigation = LiveDataWrapper.Navigation()
+        private val navigation = Navigation.Base()
 
-        override fun <T : ViewModel> viewModel(clazz: Class<out T>): T {
+        override fun <T : Representative<*>> viewModel(clazz: Class<out T>): T {
             return if (viewModelMap.contains(clazz)) {
                 viewModelMap[clazz] as T
             } else {
                 val viewModel = when (clazz) {
-                    MainViewModel::class.java -> MainViewModel(navigation)
+                    MainViewModel::class.java -> MainViewModel.Base(navigation)
 
-                    CreatedGameViewModel::class.java -> CreatedGameViewModel(
+                    CreateGameViewModel::class.java -> CreateGameViewModel.Base(
                         navigation, interactor
                     )
 
-                    GameViewModel::class.java -> GameViewModel(
+                    GameViewModel::class.java -> GameViewModel.Base(
                        navigation, interactor
                     )
 

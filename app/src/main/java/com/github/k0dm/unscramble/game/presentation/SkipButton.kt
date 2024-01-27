@@ -6,7 +6,6 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
 import android.widget.TextView
-import androidx.appcompat.widget.AppCompatButton
 import com.google.android.material.button.MaterialButton
 
 class SkipButton @JvmOverloads constructor(

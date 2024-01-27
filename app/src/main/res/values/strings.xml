@@ -11,4 +11,6 @@
     <string name="retry">Retry</string>
     <string name="loading_data">Loading data...</string>
     <string name="start_game">Start game</string>
+    <string name="restart_game">Restart game</string>
+    <string name="wrong_answer">Wrong answer</string>
 </resources>

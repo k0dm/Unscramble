@@ -1,19 +1,30 @@
 package com.github.k0dm.unscramble.main
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
+import com.github.k0dm.unscramble.core.Init
+import com.github.k0dm.unscramble.core.Representative
+import com.github.k0dm.unscramble.core.UiObserver
 import com.github.k0dm.unscramble.creategame.presentation.CreateGameScreen
-import com.github.k0dm.unscramble.creategame.presentation.LiveDataWrapper
-import com.github.k0dm.unscramble.creategame.presentation.ObserveNavigation
 
-class MainViewModel(
-    private val navigation: LiveDataWrapper.NavigationMutable
-) : ViewModel(), ObserveNavigation {
+interface MainViewModel : Representative<Screen>, Init {
 
-    fun init() {
-        // TODO: restore screen after death and progress
-        navigation.update(CreateGameScreen)
+    fun notifyObserved()
+
+    class Base(private val navigation: Navigation) : MainViewModel {
+
+        override fun init() {
+            // TODO: restore screen after death and progress
+            navigation.update(CreateGameScreen)
+        }
+
+        override fun startGettingUpdates(observer: UiObserver<Screen>) {
+            navigation.updateObserver(observer)
+        }
+
+        override fun stopGettingUpdates(observer: UiObserver<Screen>) {
+            navigation.updateObserver(observer)
+        }
+
+        override fun notifyObserved() = navigation.clear()
     }
-
-    override fun navigationLiveData() = navigation.navigationLiveData()
 }
+

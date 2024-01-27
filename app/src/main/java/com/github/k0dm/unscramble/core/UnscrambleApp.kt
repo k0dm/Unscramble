@@ -10,5 +10,5 @@ class UnscrambleApp: Application(), ProvideViewModel{
         super.onCreate()
         factory = ProvideViewModel.Factory()
     }
-    override fun <T : ViewModel> viewModel(clazz: Class<out T>): T  = factory.viewModel(clazz)
+    override fun <T : Representative<*>> viewModel(clazz: Class<out T>): T  = factory.viewModel(clazz)
 }

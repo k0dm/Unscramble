@@ -1,7 +1,7 @@
 package com.github.k0dm.unscramble.creategame.domain
 
+import com.github.k0dm.unscramble.game.presentation.GameUiState
 import com.github.k0dm.unscramble.game.presentation.ShuffleWord
-import com.github.k0dm.unscramble.game.presentation.UiState
 
 interface GameSession {
 
@@ -12,7 +12,7 @@ interface GameSession {
     fun nextWord()
     fun isLastWord(): Boolean
     fun isGameOver(): Boolean
-    fun map(uiMapper: UiMapper): UiState
+    fun map(uiMapper: UiMapper): GameUiState
 
 
     data class Base(
@@ -48,7 +48,7 @@ interface GameSession {
         override fun isLastWord(): Boolean = currentIndex == words.lastIndex
         override fun isGameOver() = isFinished
 
-        override fun map(uiMapper: UiMapper): UiState = uiMapper.map(
+        override fun map(uiMapper: UiMapper): GameUiState = uiMapper.map(
             shuffledWord = shuffleWord.shuffle(currentWord),
             counter = "${currentIndex + 1}/$maxWords",
             score = "$score"
@@ -69,39 +69,39 @@ interface GameSession {
         override fun isLastWord() = false
         override fun isGameOver(): Boolean = false
 
-        override fun map(uiMapper: UiMapper): UiState = uiMapper.map("", "", "")
+        override fun map(uiMapper: UiMapper): GameUiState = uiMapper.map("", "", "")
     }
 }
 
 interface UiMapper {
 
-    fun map(shuffledWord: String, counter: String, score: String): UiState
+    fun map(shuffledWord: String, counter: String, score: String): GameUiState
 
     object ToInitial : UiMapper {
-        override fun map(shuffledWord: String, counter: String, score: String): UiState {
-            return UiState.Initial(counter, score, shuffledWord)
+        override fun map(shuffledWord: String, counter: String, score: String): GameUiState {
+            return GameUiState.Initial(counter, score, shuffledWord)
         }
     }
 
     data class IsReadyToSubmit(private val text: String) : UiMapper {
-        override fun map(shuffledWord: String, counter: String, score: String): UiState {
+        override fun map(shuffledWord: String, counter: String, score: String): GameUiState {
             return if (text.length == shuffledWord.length) {
-                UiState.ReadyToSubmit
+                GameUiState.ReadyToSubmit
             } else {
-                UiState.NotReadyToSubmit
+                GameUiState.NotReadyToSubmit
             }
         }
     }
 
     object GameOver : UiMapper {
-        override fun map(shuffledWord: String, counter: String, score: String): UiState {
-            return UiState.GameOver(score)
+        override fun map(shuffledWord: String, counter: String, score: String): GameUiState {
+            return GameUiState.GameOver(score)
         }
     }
 
     object Error : UiMapper {
-        override fun map(shuffledWord: String, counter: String, score: String): UiState {
-            return UiState.Error
+        override fun map(shuffledWord: String, counter: String, score: String): GameUiState {
+            return GameUiState.Error
         }
     }
 }

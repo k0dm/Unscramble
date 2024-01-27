@@ -9,11 +9,13 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import com.github.k0dm.unscramble.R
 import com.github.k0dm.unscramble.core.ProvideViewModel
+import com.github.k0dm.unscramble.core.UiObserver
 import com.github.k0dm.unscramble.databinding.FragmentCreateGameBinding
 
 class CreateGameFragment : Fragment() {
 
     private var binding: FragmentCreateGameBinding? = null
+    private lateinit var viewModel: CreateGameViewModel
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -25,10 +27,9 @@ class CreateGameFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding!!) {
         super.onViewCreated(view, savedInstanceState)
-        val viewModel =
-            (requireActivity() as ProvideViewModel).viewModel(CreatedGameViewModel::class.java)
+        viewModel = (requireActivity() as ProvideViewModel).viewModel(CreateGameViewModel::class.java)
 
-        startGameButton.setOnClickListener{
+        startGameButton.setOnClickListener {
             viewModel.createGame(textInputEditText.text.toString().toInt())
         }
 
@@ -63,11 +64,23 @@ class CreateGameFragment : Fragment() {
             textInputEditText.setText(value.toInt().toString())
         }
 
-        viewModel.createdGameUiStateLiveData().observe(viewLifecycleOwner){uiState->
-            uiState.show(this)
+        if (savedInstanceState == null){
+            viewModel.init()
         }
+    }
 
-        viewModel.init()
+    override fun onResume() {
+        super.onResume()
+        viewModel.startGettingUpdates(object : UiObserver<CreateGameUiState>{
+            override fun update(data: CreateGameUiState) {
+                data.show(binding!!)
+            }
+        })
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.stopGettingUpdates()
     }
 
     override fun onDestroyView() {

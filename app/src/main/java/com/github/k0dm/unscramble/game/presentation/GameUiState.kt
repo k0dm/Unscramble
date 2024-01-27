@@ -5,11 +5,11 @@ import androidx.core.content.ContextCompat
 import com.github.k0dm.unscramble.R
 import com.github.k0dm.unscramble.databinding.FragmentGameBinding
 
-interface UiState {
+interface GameUiState {
 
     fun show(binding: FragmentGameBinding)
 
-    object Empty : UiState{
+    object Empty : GameUiState{
         override fun show(binding: FragmentGameBinding) = Unit
     }
 
@@ -17,22 +17,22 @@ interface UiState {
         private val counter: String,
         private val score: String,
         private val shuffledWord: String,
-    ) : UiState {
+    ) : GameUiState {
         override fun show(binding: FragmentGameBinding) = with(binding) {
-            mainLayout.visibility = View.VISIBLE
+            mainLayout.show()
             counterTextView.text = counter
             shuffledWordTextView.text = shuffledWord
             textInputLayout.error = ""
             textInputLayout.isErrorEnabled = false
             textInputEditText.text = null
 
-            submitButton.visibility = View.VISIBLE
+            submitButton.show()
             submitButton.isEnabled = false
             submitButton.setBackgroundColor(ContextCompat.getColor(
                 submitButton.context,
                 R.color.grey
             ))
-            skipButton.text = "Skip"
+            skipButton.setText(R.string.skip)
             skipButton.setTextColor(
                 ContextCompat.getColor(
                     skipButton.context,
@@ -43,7 +43,7 @@ interface UiState {
         }
     }
 
-    object NotReadyToSubmit : UiState {
+    object NotReadyToSubmit : GameUiState {
         override fun show(binding: FragmentGameBinding) = with(binding) {
             submitButton.isEnabled = false
             submitButton.setBackgroundColor(ContextCompat.getColor(
@@ -54,9 +54,9 @@ interface UiState {
         }
     }
 
-    object ReadyToSubmit : UiState {
+    object ReadyToSubmit : GameUiState {
         override fun show(binding: FragmentGameBinding)= with(binding) {
-            submitButton.isEnabled = true
+            submitButton.enable()
             submitButton.setBackgroundColor(ContextCompat.getColor(
                 submitButton.context,
                 R.color.primary_color
@@ -64,20 +64,20 @@ interface UiState {
         }
     }
 
-    object Error : UiState {
+    object Error : GameUiState {
         override fun show(binding: FragmentGameBinding) = with(binding) {
-            textInputLayout.error = "Wrong answer"
+            textInputLayout.error = textInputLayout.context.getString(R.string.wrong_answer)
             textInputLayout.isErrorEnabled = true
         }
     }
 
-    data class GameOver(private val score: String) : UiState {
+    data class GameOver(private val score: String) : GameUiState {
         override fun show(binding: FragmentGameBinding) = with(binding) {
             mainLayout.visibility = View.GONE
             textInputLayout.error = ""
             textInputLayout.isErrorEnabled = false
-            submitButton.visibility = View.GONE
-            skipButton.text = "Restart game"
+            submitButton.hide()
+            skipButton.setText(R.string.restart_game)
             skipButton.setTextColor(
                 ContextCompat.getColor(
                     skipButton.context,

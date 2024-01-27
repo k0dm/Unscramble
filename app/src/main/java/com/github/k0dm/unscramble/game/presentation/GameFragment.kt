@@ -1,48 +1,59 @@
 package com.github.k0dm.unscramble.game.presentation
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import com.github.k0dm.unscramble.core.ProvideViewModel
-import com.github.k0dm.unscramble.core.UnscrambleApp
+import com.github.k0dm.unscramble.core.UiObserver
 import com.github.k0dm.unscramble.databinding.FragmentGameBinding
 
 class GameFragment : Fragment() {
 
     private var binding: FragmentGameBinding? = null
+    private lateinit var viewModel: GameViewModel
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentGameBinding.inflate(inflater,container,false)
+        binding = FragmentGameBinding.inflate(inflater, container, false)
         return binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding!!) {
         super.onViewCreated(view, savedInstanceState)
-        val viewModel = (requireActivity() as ProvideViewModel).viewModel(GameViewModel::class.java)
-        Log.d("k0dm", "bundle is null ${savedInstanceState == null}")
+        viewModel = (requireActivity() as ProvideViewModel).viewModel(GameViewModel::class.java)
+
         submitButton.setOnClickListener {
-            val uiState = viewModel.submit(textInputEditText.text.toString())
-            uiState.show(this)
+            viewModel.submit(textInputEditText.text.toString())
         }
         skipButton.setOnClickListener {
-            val uiState = viewModel.skip()
-            uiState.show(this)
+            viewModel.skip()
         }
         textInputEditText.doAfterTextChanged {
-            val uiState = viewModel.update(textInputEditText.text.toString())
-            uiState.show(this)
+            viewModel.update(textInputEditText.text.toString())
         }
         if (savedInstanceState == null) {
-            val uiState = viewModel.init()
-            uiState.show(this)
+            viewModel.init()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.startGettingUpdates(object : UiObserver<GameUiState> {
+            override fun update(data: GameUiState) {
+                data.show(binding!!)
+            }
+        })
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.stopGettingUpdates()
     }
 
     override fun onDestroyView() {

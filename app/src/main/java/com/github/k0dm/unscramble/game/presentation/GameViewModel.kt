@@ -1,60 +1,80 @@
 package com.github.k0dm.unscramble.game.presentation
 
-import androidx.lifecycle.ViewModel
-import com.github.k0dm.unscramble.creategame.domain.GameSession
+import com.github.k0dm.unscramble.core.Init
+import com.github.k0dm.unscramble.core.Representative
+import com.github.k0dm.unscramble.core.UiObserver
 import com.github.k0dm.unscramble.creategame.domain.GameInteractor
+import com.github.k0dm.unscramble.creategame.domain.GameSession
 import com.github.k0dm.unscramble.creategame.domain.UiMapper
 import com.github.k0dm.unscramble.creategame.presentation.CreateGameScreen
-import com.github.k0dm.unscramble.creategame.presentation.LiveDataWrapper
-import com.github.k0dm.unscramble.main.Screen
+import com.github.k0dm.unscramble.main.Navigation
 
-class GameViewModel(
-    private val navigation: LiveDataWrapper.Update<Screen>,
-    private val gameInteractor: GameInteractor.StartGame,
-    private val toInitialUiMapper: UiMapper = UiMapper.ToInitial,
-    private val toGameOverMapper: UiMapper = UiMapper.GameOver,
-    private val toErrorMapper: UiMapper = UiMapper.Error
-): ViewModel() {
+interface GameViewModel: Representative<GameUiState>, Init {
 
-    private var gameSession: GameSession = GameSession.Empty
+    fun update(text: String)
 
-    fun init(): UiState {
-        gameSession = gameInteractor.gameSession()
-        return gameSession.map(toInitialUiMapper)
-    }
+    fun submit(word: String)
 
-    fun update(text: String): UiState = gameSession.map(UiMapper.IsReadyToSubmit(text))
+    fun skip()
+    class Base(
+        private val navigation: Navigation,
+        private val gameInteractor: GameInteractor.StartGame,
+        private val gameUiStateObservable: GameUiStateObservable = GameUiStateObservable.Base(),
+        private val toInitialUiMapper: UiMapper = UiMapper.ToInitial,
+        private val toGameOverMapper: UiMapper = UiMapper.GameOver,
+        private val toErrorMapper: UiMapper = UiMapper.Error
+    ) : GameViewModel {
 
-    fun submit(word: String): UiState {
-        return if (gameSession.isTheSameWord(word)) {
-            gameSession.calculateScore()
-            if (gameSession.isLastWord()) {
-                gameSession.finishGame()
-                gameSession.map(toGameOverMapper)
+        private var gameSession: GameSession = GameSession.Empty
+
+        override fun init() {
+            gameSession = gameInteractor.gameSession()
+            gameUiStateObservable.update(gameSession.map(toInitialUiMapper))
+        }
+
+        override fun update(text: String) {
+            gameUiStateObservable.update(gameSession.map(UiMapper.IsReadyToSubmit(text)))
+        }
+
+        override fun submit(word: String) {
+            val uiState = if (gameSession.isTheSameWord(word)) {
+                gameSession.calculateScore()
+                if (gameSession.isLastWord()) {
+                    gameSession.finishGame()
+                    gameSession.map(toGameOverMapper)
+                } else {
+                    gameSession.nextWord()
+                    gameSession.map(toInitialUiMapper)
+                }
+            } else {
+                gameSession.attempt()
+                gameSession.map(toErrorMapper)
+            }
+            gameUiStateObservable.update(uiState)
+        }
+
+        override fun skip() {
+            val uiState = if (gameSession.isLastWord()) {
+                if (gameSession.isGameOver()) {
+                    navigation.update(CreateGameScreen)
+                    GameUiState.Empty
+                } else {
+                    gameSession.finishGame()
+                    gameSession.map(toGameOverMapper)
+                }
             } else {
                 gameSession.nextWord()
-                val uiState = gameSession.map(toInitialUiMapper)
-                uiState
+                gameSession.map(toInitialUiMapper)
             }
-        } else {
-            gameSession.attempt()
-            gameSession.map(toErrorMapper)
+            gameUiStateObservable.update(uiState)
         }
-    }
 
-    fun skip(): UiState {
-        return if (gameSession.isLastWord()) {
-            if (gameSession.isGameOver()) {
-                navigation.update(CreateGameScreen)
-                UiState.Empty
-            } else {
-                gameSession.finishGame()
-                gameSession.map(toGameOverMapper)
-            }
-        } else {
-            gameSession.nextWord()
-            gameSession.map(toInitialUiMapper)
+        override fun startGettingUpdates(observer: UiObserver<GameUiState>) {
+            gameUiStateObservable.updateObserver(observer)
+        }
+
+        override fun stopGettingUpdates(observer: UiObserver<GameUiState>) {
+            gameUiStateObservable.updateObserver(observer)
         }
     }
 }
-

@@ -6,7 +6,7 @@ import com.github.k0dm.unscramble.creategame.domain.GameInteractor
 import com.github.k0dm.unscramble.creategame.domain.UiMapper
 import com.github.k0dm.unscramble.game.presentation.GameViewModel
 import com.github.k0dm.unscramble.game.presentation.ShuffleWord
-import com.github.k0dm.unscramble.game.presentation.UiState
+import com.github.k0dm.unscramble.game.presentation.GameUiState
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -22,51 +22,51 @@ class GameViewModelTest {
 
     @Test
     fun correctTwice() {
-        var actual: UiState = viewModel.init()
-        var expected: UiState =
-            UiState.Initial(counter = "1/2", score = "0", shuffledWord = "lamina")
+        var actual: GameUiState = viewModel.init()
+        var expected: GameUiState =
+            GameUiState.Initial(counter = "1/2", score = "0", shuffledWord = "lamina")
         assertEquals(expected, actual)
 
         "anima".forEachIndexed { index, _ ->
 
             actual = viewModel.update(text = "anima".substring(0..index))
-            expected = UiState.NotReadyToSubmit
+            expected = GameUiState.NotReadyToSubmit
             assertEquals(expected, actual)
         }
 
         actual = viewModel.update("animal")
-        expected = UiState.ReadyToSubmit
+        expected = GameUiState.ReadyToSubmit
         assertEquals(expected, actual)
 
         actual = viewModel.update("animall")
-        expected = UiState.NotReadyToSubmit
+        expected = GameUiState.NotReadyToSubmit
         assertEquals(expected, actual)
 
         actual = viewModel.update("animal")
-        expected = UiState.ReadyToSubmit
+        expected = GameUiState.ReadyToSubmit
         assertEquals(expected, actual)
 
         actual = viewModel.submit(word = "animal")
-        expected = UiState.Initial(counter = "2/2", score = "20", shuffledWord = "otua")
+        expected = GameUiState.Initial(counter = "2/2", score = "20", shuffledWord = "otua")
         assertEquals(expected, actual)
 
         "aut".forEachIndexed { index, _ ->
 
             actual = viewModel.update("aut".substring(0..index))
-            expected = UiState.NotReadyToSubmit
+            expected = GameUiState.NotReadyToSubmit
             assertEquals(expected, actual)
         }
         actual = viewModel.update("auto")
-        expected = UiState.ReadyToSubmit
+        expected = GameUiState.ReadyToSubmit
         assertEquals(expected, actual)
 
         actual = viewModel.submit("auto")
-        expected = UiState.GameOver(score = "40")
+        expected = GameUiState.GameOver(score = "40")
         assertEquals(expected, actual)
 
         actual = viewModel.skip()
         expected =
-            UiState.Initial(counter = "1/2", score = "0", shuffledWord = "anecdote".reversed())
+            GameUiState.Initial(counter = "1/2", score = "0", shuffledWord = "anecdote".reversed())
         assertEquals(expected, actual)
     }
 
@@ -74,95 +74,95 @@ class GameViewModelTest {
     fun incorrectThenCorrect() {
         correctTwice()
 
-        var actual: UiState = viewModel.update("anecdote".reversed())
-        var expected: UiState = UiState.ReadyToSubmit
+        var actual: GameUiState = viewModel.update("anecdote".reversed())
+        var expected: GameUiState = GameUiState.ReadyToSubmit
         assertEquals(expected, actual)
 
         actual = viewModel.submit("anecdote".reversed())
-        expected = UiState.Error
+        expected = GameUiState.Error
         assertEquals(expected, actual)
 
         "anecdot".forEachIndexed { index, _ ->
             actual = viewModel.update("anecdot".substring(index))
-            expected = UiState.NotReadyToSubmit
+            expected = GameUiState.NotReadyToSubmit
             assertEquals(expected, actual)
         }
 
         actual = viewModel.update("")
-        expected = UiState.NotReadyToSubmit
+        expected = GameUiState.NotReadyToSubmit
         assertEquals(expected, actual)
 
         "anecdot".forEachIndexed { index, _ ->
             actual = viewModel.update("anecdot".substring(0..index))
-            expected = UiState.NotReadyToSubmit
+            expected = GameUiState.NotReadyToSubmit
             assertEquals(expected, actual)
         }
 
         actual = viewModel.update("anecdote")
-        expected = UiState.ReadyToSubmit
+        expected = GameUiState.ReadyToSubmit
         assertEquals(expected, actual)
 
         actual = viewModel.submit("anecdote")
-        expected = UiState.Initial(counter = "2/2", score = "10", shuffledWord = "hello".reversed())
+        expected = GameUiState.Initial(counter = "2/2", score = "10", shuffledWord = "hello".reversed())
         assertEquals(expected, actual)
 
         "hell".forEachIndexed { index, _ ->
             actual = viewModel.update("hell".substring(0..index))
-            expected = UiState.NotReadyToSubmit
+            expected = GameUiState.NotReadyToSubmit
             assertEquals(expected, actual)
         }
 
         actual = viewModel.update("hellq")
-        expected = UiState.ReadyToSubmit
+        expected = GameUiState.ReadyToSubmit
         assertEquals(expected, actual)
 
         actual = viewModel.submit("hellq")
-        expected = UiState.Error
+        expected = GameUiState.Error
         assertEquals(expected, actual)
 
         actual = viewModel.update("hell")
-        expected = UiState.NotReadyToSubmit
+        expected = GameUiState.NotReadyToSubmit
         assertEquals(expected, actual)
 
         actual = viewModel.update("hello")
-        expected = UiState.ReadyToSubmit
+        expected = GameUiState.ReadyToSubmit
         assertEquals(expected, actual)
 
         actual = viewModel.submit("hello")
-        expected = UiState.GameOver(score = "20")
+        expected = GameUiState.GameOver(score = "20")
         assertEquals(expected, actual)
 
     }
 
     @Test
     fun incorrectThenSkipThenIncorrectThenCorrect() {
-        var actual: UiState = viewModel.init()
-        var expected: UiState =
-            UiState.Initial(counter = "1/2", score = "0", shuffledWord = "lamina")
+        var actual: GameUiState = viewModel.init()
+        var expected: GameUiState =
+            GameUiState.Initial(counter = "1/2", score = "0", shuffledWord = "lamina")
         assertEquals(expected, actual)
 
         actual = viewModel.submit("animak")
-        expected = UiState.Error
+        expected = GameUiState.Error
         assertEquals(expected, actual)
 
         actual = viewModel.skip()
-        expected = UiState.Initial(counter = "2/2", score = "0", shuffledWord = "otua")
+        expected = GameUiState.Initial(counter = "2/2", score = "0", shuffledWord = "otua")
         assertEquals(expected, actual)
 
         actual = viewModel.submit("autq")
-        expected = UiState.Error
+        expected = GameUiState.Error
         assertEquals(expected, actual)
 
         actual = viewModel.update("aut")
-        expected = UiState.NotReadyToSubmit
+        expected = GameUiState.NotReadyToSubmit
         assertEquals(expected, actual)
 
         actual = viewModel.update("auto")
-        expected = UiState.ReadyToSubmit
+        expected = GameUiState.ReadyToSubmit
         assertEquals(expected, actual)
 
         actual = viewModel.submit("auto")
-        expected = UiState.GameOver(score = "10")
+        expected = GameUiState.GameOver(score = "10")
         assertEquals(expected, actual)
     }
 }
