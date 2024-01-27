@@ -9,7 +9,7 @@ interface MainViewModel : Representative<Screen>, Init {
 
     fun notifyObserved()
 
-    class Base(private val navigation: Navigation) : MainViewModel {
+    class Base(private val navigation: Navigation.Mutable) : MainViewModel {
 
         override fun init() {
             // TODO: restore screen after death and progress

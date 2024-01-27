@@ -1,8 +1,6 @@
 package com.github.k0dm.unscramble.core
 
-interface UiObservable<T> : UiUpdate<T>, UpdateObserver<T> {
-
-    fun clear()
+interface UiObservable<T> : UiUpdate<T>, UpdateObserver<T>, Clear {
 
     abstract class Abstract<T : Any>(private val empty: T) : UiObservable<T> {
 
@@ -30,7 +28,7 @@ interface UiUpdate<T> {
 }
 
 interface UiObserver<T> : UiUpdate<T> {
-     class Empty<T> : UiObserver<T> {
+    class Empty<T> : UiObserver<T> {
         override fun update(data: T) = Unit
     }
 }

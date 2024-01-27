@@ -17,7 +17,7 @@ interface GameViewModel: Representative<GameUiState>, Init {
 
     fun skip()
     class Base(
-        private val navigation: Navigation,
+        private val navigation: Navigation.Navigate,
         private val gameInteractor: GameInteractor.StartGame,
         private val gameUiStateObservable: GameUiStateObservable = GameUiStateObservable.Base(),
         private val toInitialUiMapper: UiMapper = UiMapper.ToInitial,

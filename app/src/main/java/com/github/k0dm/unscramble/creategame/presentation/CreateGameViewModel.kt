@@ -18,7 +18,7 @@ interface CreateGameViewModel : Representative<CreateGameUiState>, Init {
     fun createGame(numberOfWords: Int)
 
     class Base(
-        private val navigation: Navigation,
+        private val navigation: Navigation.Navigate,
         private val interactor: GameInteractor.CreateGame,
         private val createGameUiStateObservable: CreateGameUiStateObservable = CreateGameUiStateObservable.Base(),
         private val dispatcherList: DispatchersList = DispatchersList.Base()
