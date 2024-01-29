@@ -16,6 +16,7 @@ interface GameViewModel: Representative<GameUiState>, Init {
     fun submit(word: String)
 
     fun skip()
+
     class Base(
         private val navigation: Navigation.Navigate,
         private val gameInteractor: GameInteractor.GameInteraction,

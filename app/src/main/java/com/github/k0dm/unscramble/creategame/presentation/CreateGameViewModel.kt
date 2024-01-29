@@ -3,6 +3,7 @@ package com.github.k0dm.unscramble.creategame.presentation
 import com.github.k0dm.unscramble.core.DispatchersList
 import com.github.k0dm.unscramble.core.Init
 import com.github.k0dm.unscramble.core.Representative
+import com.github.k0dm.unscramble.core.RunAsync
 import com.github.k0dm.unscramble.core.UiObserver
 import com.github.k0dm.unscramble.creategame.domain.GameInteractor
 import com.github.k0dm.unscramble.game.presentation.GameScreen
@@ -18,29 +19,22 @@ interface CreateGameViewModel : Representative<CreateGameUiState>, Init {
     fun createGame(numberOfWords: Int)
 
     class Base(
+        runAsync: RunAsync,
         private val navigation: Navigation.Navigate,
         private val interactor: GameInteractor.CreateGame,
         private val createGameUiStateObservable: CreateGameUiStateObservable = CreateGameUiStateObservable.Base(),
-        private val dispatcherList: DispatchersList = DispatchersList.Base()
-    ) : CreateGameViewModel {
-
-        private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    ) : CreateGameViewModel, Representative.Abstract<CreateGameUiState>(runAsync) {
 
         override fun init() = createGameUiStateObservable.update(CreateGameUiState.Initial)
 
         override fun createGame(numberOfWords: Int) {
             createGameUiStateObservable.update(CreateGameUiState.Loading)
 
-            viewModelScope.launch(dispatcherList.background()) {
-                val result = interactor.createGame(numberOfWords)
-
-                withContext(dispatcherList.ui()) {
-                    if (result.isCreated()) {
-
-                        navigation.update(GameScreen)
-                    } else {
-                        result.showError(createGameUiStateObservable)
-                    }
+            handleAsync({interactor.createGame(numberOfWords)}){ result->
+                if (result.isCreated()) {
+                    navigation.update(GameScreen)
+                } else {
+                    result.showError(createGameUiStateObservable)
                 }
             }
         }
