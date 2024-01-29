@@ -36,6 +36,7 @@ interface CreateGameViewModel : Representative<CreateGameUiState>, Init {
 
                 withContext(dispatcherList.ui()) {
                     if (result.isCreated()) {
+
                         navigation.update(GameScreen)
                     } else {
                         result.showError(createGameUiStateObservable)

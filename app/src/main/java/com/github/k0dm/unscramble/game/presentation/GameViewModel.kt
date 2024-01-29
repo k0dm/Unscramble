@@ -18,7 +18,7 @@ interface GameViewModel: Representative<GameUiState>, Init {
     fun skip()
     class Base(
         private val navigation: Navigation.Navigate,
-        private val gameInteractor: GameInteractor.StartGame,
+        private val gameInteractor: GameInteractor.GameInteraction,
         private val gameUiStateObservable: GameUiStateObservable = GameUiStateObservable.Base(),
         private val toInitialUiMapper: UiMapper = UiMapper.ToInitial,
         private val toGameOverMapper: UiMapper = UiMapper.GameOver,
@@ -59,6 +59,7 @@ interface GameViewModel: Representative<GameUiState>, Init {
                     navigation.update(CreateGameScreen)
                     GameUiState.Empty
                 } else {
+                    gameInteractor.finishGame()
                     gameSession.finishGame()
                     gameSession.map(toGameOverMapper)
                 }
@@ -75,6 +76,7 @@ interface GameViewModel: Representative<GameUiState>, Init {
 
         override fun stopGettingUpdates(observer: UiObserver<GameUiState>) {
             gameUiStateObservable.updateObserver(observer)
+            gameInteractor.saveGame()
         }
     }
 }

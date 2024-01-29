@@ -14,7 +14,6 @@ interface GameSession {
     fun isGameOver(): Boolean
     fun map(uiMapper: UiMapper): GameUiState
 
-
     data class Base(
         private val words: List<String>,
         private val maxWords: Int,
@@ -46,6 +45,7 @@ interface GameSession {
         }
 
         override fun isLastWord(): Boolean = currentIndex == words.lastIndex
+
         override fun isGameOver() = isFinished
 
         override fun map(uiMapper: UiMapper): GameUiState = uiMapper.map(
@@ -53,22 +53,17 @@ interface GameSession {
             counter = "${currentIndex + 1}/$maxWords",
             score = "$score"
         )
+
     }
 
     object Empty : GameSession {
-
         override fun isTheSameWord(word: String) = false
-
         override fun calculateScore() = Unit
         override fun attempt() = Unit
-
         override fun finishGame() = Unit
-
         override fun nextWord() = Unit
-
         override fun isLastWord() = false
         override fun isGameOver(): Boolean = false
-
         override fun map(uiMapper: UiMapper): GameUiState = uiMapper.map("", "", "")
     }
 }

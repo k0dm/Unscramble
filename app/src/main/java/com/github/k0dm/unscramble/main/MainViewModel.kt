@@ -4,16 +4,24 @@ import com.github.k0dm.unscramble.core.Init
 import com.github.k0dm.unscramble.core.Representative
 import com.github.k0dm.unscramble.core.UiObserver
 import com.github.k0dm.unscramble.creategame.presentation.CreateGameScreen
+import com.github.k0dm.unscramble.game.presentation.GameScreen
+import com.github.k0dm.unscramble.main.data.ScreenRepository
 
 interface MainViewModel : Representative<Screen>, Init {
 
     fun notifyObserved()
 
-    class Base(private val navigation: Navigation.Mutable) : MainViewModel {
+    class Base(
+        private val navigation: Navigation.Mutable,
+        private val screenRepository: ScreenRepository.Read
+    ) : MainViewModel {
 
         override fun init() {
-            // TODO: restore screen after death and progress
-            navigation.update(CreateGameScreen)
+            if(screenRepository.shouldLoadNewGame()){
+                navigation.update(CreateGameScreen)
+            }else{
+                navigation.update(GameScreen)
+            }
         }
 
         override fun startGettingUpdates(observer: UiObserver<Screen>) {
