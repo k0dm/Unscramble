@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Unscramble</string>
+    <string name="unscramble">Unscramble</string>
+    <string name="clue">Unsramble the world using all the letters.</string>
+    <string name="enter_your_word">Enter your word</string>
+    <string name="submit">Submit</string>
+    <string name="skip">Skip</string>
+    <string name="score">Score:</string>
+    <string name="enter_text_here">Enter text here</string>
+    <string name="enter_number_of_words">Enter number of words</string>
+    <string name="retry">Retry</string>
+    <string name="loading_data">Loading data...</string>
+    <string name="start_game">Start game</string>
+    <string name="restart_game">Restart game</string>
+    <string name="wrong_answer">Wrong answer</string>
 </resources>
